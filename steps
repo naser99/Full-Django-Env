@@ -1,0 +1,116 @@
+
+
+# CREATE MASTER USER
+
+Add user master
+
+# INSTALL NEED LIBRARY
+
+sudo apt-get update
+
+sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx
+
+sudo -H pip3 install --upgrade pip
+
+sudo -H pip3 install virtualenv virtualenvwrapper
+
+
+# CREATE DROPPY POSTGRES DB
+
+sudo -u postgres psql
+
+CREATE DATABASE droppy;
+
+CREATE USER droppyuser WITH PASSWORD 'droppypassword';
+
+ALTER ROLE droppyuser SET client_encoding TO 'utf8';
+ALTER ROLE droppyuser SET default_transaction_isolation TO 'read committed';
+ALTER ROLE droppyuser SET timezone TO 'UTC';
+
+GRANT ALL PRIVILEGES ON DATABASE droppy TO droppyuser;
+
+\q
+
+
+
+# CREATE DROPPY ENV
+
+echo "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3" >> ~/.bashrc
+echo "export WORKON_HOME=~/Env" >> ~/.bashrc
+echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+source ~/.bashrc
+
+mkvirtualenv droppy
+
+# INTALL PYTHON REQ LIBRARY
+
+pip -r requirements.txt
+	django
+	elery
+	channels
+	redis
+	
+
+# START DJANGO PROJECT
+	
+cd ~
+
+django-admin.py startproject droppy
+
+
+# ALTER SETTINGS
+
+nano ~/droppy/droppy/settings.py
+		
+		ALLOWED_HOSTS = ['your_server_domain_or_IP', 'second_domain_or_IP', . . .]
+		
+		
+		STATIC_URL = '/static/'
+		STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+		
+		DATABASES = {
+			'default': {
+				'ENGINE': 'django.db.backends.postgresql_psycopg2',
+				'NAME': 'droppy',
+				'USER': 'droppyuser',
+				'PASSWORD': 'droppypassword',
+				'HOST': 'localhost',
+				'PORT': '',
+			}
+		}
+
+	
+# MAKE MIGRATIONS - MIGRATE - CREATE SUPER USER
+	
+cd ~/droppy
+~/droppy/manage.py makemigrations
+~/droppy/manage.py migrate
+~/droppy/manage.py createsuperuser
+
+
+# COLLECT STATIC
+
+~/droppy/manage.py collectstatic
+
+# COLLECT STATIC
+# Next, we can open a port so that we can access the Django development server. 
+# If you followed the initial server setup guide, you should have a UFW firewall enabled.
+# Allow connections to port 80 by typing:
+
+sudo ufw allow 80
+
+# RUNSERVER
+
+~/droppy/manage.py runserver 0.0.0.0:80
+
+
+
+
+
+
+
+
+
+
+
+
